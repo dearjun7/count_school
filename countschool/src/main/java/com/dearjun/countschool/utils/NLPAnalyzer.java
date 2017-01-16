@@ -15,6 +15,8 @@ public class NLPAnalyzer {
     private int wordMorphIndex = 0;
     private char[] calibrateWordArr = null;
     private String patternStr = null;
+    protected static Pattern searchWordPattern = null;
+    private Komoran komoran = null;
 
     public void setCalibrateWordArr(char[] calibrateWordArr) {
         this.calibrateWordArr = calibrateWordArr;
@@ -22,14 +24,33 @@ public class NLPAnalyzer {
 
     public NLPAnalyzer(String patternStr) {
         this.patternStr = patternStr;
+        searchWordPattern = Pattern.compile("^.{0,}(" + this.patternStr + ")$", 2);
+        this.komoran = new Komoran(ExecuteCountSchool.class.getResource("/models").getPath());
         this.setCalibrateWordArr(patternStr.toCharArray());
     }
 
     @SuppressWarnings("unchecked")
+    public String getWord(String targetWord) {
+        List<List<Pair<String, String>>> analyzeList = komoran.analyze(targetWord);
+        String result = "";
+
+        for(List<Pair<String, String>> analyze : analyzeList) {
+            //            this.wordMorphIndex = 0;
+
+            for(Pair<String, String> wordMorph : analyze) {
+                if("NNG".equals(wordMorph.getSecond())) {
+                    result = result + wordMorph.getFirst();
+                }
+                //                this.wordMorphIndex++;
+            }
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
     public List<String> getAnalyedWordList(List<String> targetListToAnalyze) {
-        Komoran komoran = new Komoran(ExecuteCountSchool.class.getResource("/models").getPath());
         List<String> foundList = new ArrayList<String>();
-        Pattern searchWordPattern = Pattern.compile("^.{0,}(" + this.patternStr + ")$", 2);
 
         for(String tmpList : targetListToAnalyze) {
             List<List<Pair<String, String>>> resultList = komoran.analyze(tmpList);
@@ -38,7 +59,7 @@ public class NLPAnalyzer {
                 this.wordMorphIndex = 0;
 
                 for(Pair<String, String> wordMorph : result) {
-                    String foundWord = this.getFoundWord(wordMorph, searchWordPattern, result);
+                    String foundWord = this.getFoundWord(wordMorph, result);
 
                     if(!"".equals(foundWord) && !(this.patternStr).equals(foundWord)) {
                         foundList.add(foundWord);
@@ -51,7 +72,7 @@ public class NLPAnalyzer {
         return foundList;
     }
 
-    private String getFoundWord(Pair<String, String> wordMorph, Pattern searchWordPattern, List<Pair<String, String>> wordMorphPairList) {
+    private String getFoundWord(Pair<String, String> wordMorph, List<Pair<String, String>> wordMorphPairList) {
         String foundWord = "";
 
         if("NNG".equals(wordMorph.getSecond())) { // 형태소가 명사 인 것만 추출
@@ -197,6 +218,12 @@ public class NLPAnalyzer {
         protected void executeSetPrevWord(Pair<String, String> targetWordMorph, Pair<String, String> prevWordMorph,
                 char[] calibrateWordArr) {
             String tmpWord = prevWordMorph.getFirst();
+            Matcher matcher = searchWordPattern.matcher(tmpWord);
+
+            if(matcher.find()) {
+                return;
+            }
+
             boolean isDetectedCalibWord = this.detecteCalibWord(calibrateWordArr, tmpWord);
 
             if(isDetectedCalibWord || !targetWordMorph.getFirst().contains(tmpWord)) {
