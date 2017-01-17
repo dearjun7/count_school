@@ -6,62 +6,52 @@ import java.util.List;
 
 import com.dearjun.countschool.type.FindSchoolType;
 import com.dearjun.countschool.utils.CommentToListMaker;
-import com.dearjun.countschool.utils.NLPAnalyzer;
-import com.dearjun.countschool.utils.StringSimilarAnalyzer;
+import com.dearjun.countschool.word.WordComparator;
+import com.dearjun.countschool.word.WordExtractor;
 
 public class ExecuteCountSchool {
 
     private static final int ALLOWED_SIMILAR_PERSANTAGE = 60;
+    //    String firstString = firstString.replace("특성화", "").replace("인터넷", "").replace("여자", "").replace("남자", "").replace("감사", "");
+    //    String secondString = secondString.replace("특성화", "").replace("인터넷", "").replace("여자", "").replace("남자", "").replace("감사", "");
 
     public static void main(String... args) throws Exception {
         String filePath = ExecuteCountSchool.class.getResource("/data/comments.csv").getPath();
         List<String> commentList = CommentToListMaker.convertFileToList(filePath);
 
-        NLPAnalyzer nlpAlanyzer = new NLPAnalyzer(FindSchoolType.HIGH_SCHOOL);
-        List<String> analyzedWordList = nlpAlanyzer.getAnalyedWordList(commentList);
-        List<String> tmpWordList = new ArrayList<String>();
+        WordExtractor wordExtractor = new WordExtractor(FindSchoolType.HIGH_SCHOOL);
+        List<String> analyzedWordList = wordExtractor.getAnalyedWordList(commentList);
+        List<String> compareWordList = new ArrayList<String>();
 
         Collections.sort(analyzedWordList);
-        tmpWordList.addAll(analyzedWordList);
+        compareWordList.addAll(analyzedWordList);
 
         String[] list = (String[]) analyzedWordList.toArray(new String[analyzedWordList.size()]);
+        boolean addPatternWordToEnd = true;
+        WordComparator wordComparator = new WordComparator(ALLOWED_SIMILAR_PERSANTAGE, addPatternWordToEnd,
+                wordExtractor.getFindWordType());
 
-        for(String analyzedWord : list) {
+        for(String firstString : list) {
             int count = 0;
 
-            if(analyzedWord == null) {
+            if(firstString == null) {
                 continue;
             }
 
             int index = 0;
-            for(String tmpWord : tmpWordList) {
-                //                String firstString = analyzedWord.replace("고등학교", "").replace("특성화", "").replace("여자", "").replace("남자", "");
-                //                String secondString = tmpWord.replace("고등학교", "").replace("특성화", "").replace("여자", "").replace("남자", "");
+            for(String secondString : compareWordList) {
+                boolean result = wordComparator.isCalibratedSimilarWord(firstString, secondString, wordExtractor);
 
-                String firstString = analyzedWord.replace("특성화", "").replace("인터넷", "").replace("상업", "").replace("여자", "").replace("남자",
-                        "");
-                String secondString = tmpWord.replace("특성화", "").replace("인터넷", "").replace("상업", "").replace("여자", "").replace("남자", "");
-
-                firstString = nlpAlanyzer.getWordExcludePatternStr(firstString, "NNG");
-                secondString = nlpAlanyzer.getWordExcludePatternStr(secondString, "NNG");
-
-                int firstLength = firstString.length();
-                int secondLength = secondString.length();
-
-                if(StringSimilarAnalyzer.similar(firstString, secondString) >= ALLOWED_SIMILAR_PERSANTAGE) {
-                    String biggerStr = firstLength > secondLength ? firstString : firstLength < secondLength ? secondString : firstString;
-                    String smallerStr = firstLength > secondLength ? secondString : firstLength < secondLength ? firstString : secondString;
-
-                    if(nlpAlanyzer.getWordExcludePatternStr(biggerStr, "NNG")
-                            .contains(nlpAlanyzer.getWordExcludePatternStr(smallerStr, "NNG"))) {
-                        //                        list[index] = null;
-                        count++;
-                    }
+                if(result) {
+                    //                    list[index] = null;
+                    count++;
+                } else {
+                    continue;
                 }
 
                 index++;
             }
-            System.out.println(analyzedWord + " : " + count);
+            System.out.println(firstString + " : " + count);
 
         }
 
