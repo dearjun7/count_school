@@ -21,8 +21,8 @@ public class StringSimilarAnalyzerTest {
 
     @Test
     public void testSimilar() {
-        String string_1 = "경기국제통상";
-        String string_2 = "국제통상";
+        String string_1 = "김유나최해윤지신채울원주연고";
+        String string_2 = "창현고";
 
         int expectedCount = string_2.length();
 

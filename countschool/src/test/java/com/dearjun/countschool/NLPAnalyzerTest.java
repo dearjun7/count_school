@@ -8,6 +8,7 @@ package com.dearjun.countschool;
 
 import org.junit.Test;
 
+import com.dearjun.countschool.type.FindSchoolType;
 import com.dearjun.countschool.utils.NLPAnalyzer;
 
 import junit.framework.Assert;
@@ -21,10 +22,9 @@ public class NLPAnalyzerTest {
 
     @Test
     public void getWordTest() {
-        String patternStr = "고등학교";
-        NLPAnalyzer nlpAlanyzer = new NLPAnalyzer(patternStr);
+        NLPAnalyzer nlpAlanyzer = new NLPAnalyzer(FindSchoolType.HIGH_SCHOOL);
 
-        System.out.println(nlpAlanyzer.getWord("부천경기국제통상"));
+        System.out.println(nlpAlanyzer.getWordExcludePatternStr("고림고등학교", "NNG"));
 
         Assert.assertTrue(true);
     }

@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.dearjun.countschool.ExecuteCountSchool;
+import com.dearjun.countschool.type.FindSchoolType;
 
 import kr.co.shineware.nlp.komoran.core.analyzer.Komoran;
 import kr.co.shineware.util.common.model.Pair;
@@ -13,39 +14,56 @@ import kr.co.shineware.util.common.model.Pair;
 public class NLPAnalyzer {
 
     private int wordMorphIndex = 0;
-    private char[] calibrateWordArr = null;
     private String patternStr = null;
     protected static Pattern searchWordPattern = null;
     private Komoran komoran = null;
 
-    public void setCalibrateWordArr(char[] calibrateWordArr) {
-        this.calibrateWordArr = calibrateWordArr;
-    }
-
-    public NLPAnalyzer(String patternStr) {
-        this.patternStr = patternStr;
+    public NLPAnalyzer(FindSchoolType schoolType) {
+        this.patternStr = schoolType.getSchoolTypeStr();
+        //searchWordPattern = Pattern.compile("^.{0,}(" + this.patternStr + "|" + patternStr.toCharArray()[0] + ")$", 2);
         searchWordPattern = Pattern.compile("^.{0,}(" + this.patternStr + ")$", 2);
         this.komoran = new Komoran(ExecuteCountSchool.class.getResource("/models").getPath());
-        this.setCalibrateWordArr(patternStr.toCharArray());
     }
 
     @SuppressWarnings("unchecked")
-    public String getWord(String targetWord) {
+    public String getWordExcludePatternStr(String targetWord, String pairTypeStr) {
         List<List<Pair<String, String>>> analyzeList = komoran.analyze(targetWord);
         String result = "";
 
         for(List<Pair<String, String>> analyze : analyzeList) {
-            //            this.wordMorphIndex = 0;
-
             for(Pair<String, String> wordMorph : analyze) {
-                if("NNG".equals(wordMorph.getSecond())) {
-                    result = result + wordMorph.getFirst();
+                String wordMorphType = wordMorph.getSecond();
+
+                if(!this.isIncludePatternStr(wordMorph.getFirst())) {
+                    try {
+                        result = result + PrevWordMorphMakerType.valueOf(wordMorphType).getExtractWord(wordMorph);
+                    } catch(IllegalArgumentException ie) {
+                        continue;
+                    }
                 }
-                //                this.wordMorphIndex++;
             }
         }
 
         return result;
+    }
+
+    private boolean isIncludePatternStr(String checkWord) {
+        String[] patternArr = this.getPatternArr();
+        boolean result = false;
+
+        for(String patternStr : patternArr) {
+            if(checkWord.equals(patternStr)) {
+                result = true;
+
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private String[] getPatternArr() {
+        return this.patternStr.split("\\|");
     }
 
     @SuppressWarnings("unchecked")
@@ -61,15 +79,29 @@ public class NLPAnalyzer {
                 for(Pair<String, String> wordMorph : result) {
                     String foundWord = this.getFoundWord(wordMorph, result);
 
-                    if(!"".equals(foundWord) && !(this.patternStr).equals(foundWord)) {
+                    if(!"".equals(foundWord) && !equalsPatternString(patternStr, foundWord)) {
                         foundList.add(foundWord);
                     }
+
                     this.wordMorphIndex++;
                 }
             }
         }
 
         return foundList;
+    }
+
+    private boolean equalsPatternString(String patternStr, String word) {
+        boolean result = false;
+        String[] patternStrArr = patternStr.split("\\|");
+
+        for(String diffStr : patternStrArr) {
+            if(result = word.equals(diffStr)) {
+                break;
+            }
+        }
+
+        return result;
     }
 
     private String getFoundWord(Pair<String, String> wordMorph, List<Pair<String, String>> wordMorphPairList) {
@@ -89,13 +121,14 @@ public class NLPAnalyzer {
 
     private void setAndFindPrevWord(Pair<String, String> targetWordMorph, List<Pair<String, String>> wordMorphPairList) {
         int tmpWordMorphIndex = this.wordMorphIndex;
+        char[] calibrateWordArr = this.patternStr.toCharArray();
 
         while(tmpWordMorphIndex > 0) {
             Pair<String, String> prevWordMorph = wordMorphPairList.get(tmpWordMorphIndex - 1);
 
             if(wordMorphPairList.size() > 1) {
                 try {
-                    PrevWordMorphType.valueOf(prevWordMorph.getSecond()).setPrevWord(targetWordMorph, prevWordMorph, this.calibrateWordArr);
+                    PrevWordMorphMakerType.valueOf(prevWordMorph.getSecond()).setPrevWord(targetWordMorph, prevWordMorph, calibrateWordArr);
                 } catch(IllegalArgumentException ie) {
                     continue;
                 } finally {
@@ -106,7 +139,7 @@ public class NLPAnalyzer {
         }
     }
 
-    private enum PrevWordMorphType {
+    private enum PrevWordMorphMakerType {
         XSN {
 
             @Override
@@ -117,6 +150,11 @@ public class NLPAnalyzer {
             @Override
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
             }
         },
         XPN {
@@ -130,6 +168,11 @@ public class NLPAnalyzer {
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
+            }
         },
         VV {
 
@@ -141,6 +184,11 @@ public class NLPAnalyzer {
             @Override
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
             }
         },
         MM {
@@ -154,6 +202,11 @@ public class NLPAnalyzer {
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
+            }
         },
         NNB {
 
@@ -166,6 +219,11 @@ public class NLPAnalyzer {
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
+            }
         },
         NNG {
 
@@ -177,6 +235,11 @@ public class NLPAnalyzer {
             @Override
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
             }
         },
         NNP {
@@ -196,6 +259,11 @@ public class NLPAnalyzer {
 
                 return locationWord;
             }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
+            }
         },
         JX {
 
@@ -208,6 +276,11 @@ public class NLPAnalyzer {
             protected String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            protected String getExtractWord(Pair<String, String> targetWordMorph) {
+                return targetWordMorph.getFirst();
+            }
         };
 
         protected abstract void setPrevWord(Pair<String, String> targetWordMorph, Pair<String, String> prevWordMorph,
@@ -215,23 +288,27 @@ public class NLPAnalyzer {
 
         protected abstract String getCheckedLocationPrevWord(Pair<String, String> targetWordMorph);
 
+        protected abstract String getExtractWord(Pair<String, String> targetWordMorph);
+
         protected void executeSetPrevWord(Pair<String, String> targetWordMorph, Pair<String, String> prevWordMorph,
                 char[] calibrateWordArr) {
-            String tmpWord = prevWordMorph.getFirst();
-            Matcher matcher = searchWordPattern.matcher(tmpWord);
+            String prevWord = prevWordMorph.getFirst();
+            Matcher matcher = searchWordPattern.matcher(prevWord);
 
             if(matcher.find()) {
                 return;
             }
 
-            boolean isDetectedCalibWord = this.detecteCalibWord(calibrateWordArr, tmpWord);
-
-            if(isDetectedCalibWord || !targetWordMorph.getFirst().contains(tmpWord)) {
-                targetWordMorph.setFirst(tmpWord + targetWordMorph.getFirst());
+            if(detecteCalibWord(calibrateWordArr, prevWord, targetWordMorph.getFirst())) {
+                targetWordMorph.setFirst(prevWord + targetWordMorph.getFirst());
             }
         }
 
-        private boolean detecteCalibWord(char[] calibrateWordArr, String targetWord) {
+        // 중복되는 단어의 보정 값을 확인한다.
+        // 1. char 단위의 패턴에 속하는 단어인지 확인 (1글자 이전 단어의 중첩여부 보정을 위하여)
+        // 2. 현재 단어를 기준으로 찾아진 이전 형태소에서 추출한 단어가 이미 현재 단어에 속해있는지를 확인 
+        // 3. 1과 2를 논리 곱으로 하여 현재 단어의 앞에 붙여도 되는 중첩되지 않은 단어인지 결과를 리턴
+        public static boolean detecteCalibWord(char[] calibrateWordArr, String targetWord, String containCheckWord) {
             boolean result = false;
 
             for(char calibWord : calibrateWordArr) {
@@ -242,7 +319,7 @@ public class NLPAnalyzer {
                 }
             }
 
-            return result;
+            return result || !containCheckWord.contains(targetWord);
         }
     }
 }
