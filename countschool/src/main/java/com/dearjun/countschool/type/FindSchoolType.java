@@ -9,7 +9,6 @@ package com.dearjun.countschool.type;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.dearjun.countschool.vo.CalibrationWordVO;
 
@@ -24,13 +23,24 @@ public enum FindSchoolType implements FindWordType {
         @Override
         public List<CalibrationWordVO> getCalibrationWordList() {
             List<CalibrationWordVO> result = new ArrayList<CalibrationWordVO>();
-            CalibrationWordVO calibWordVO = new CalibrationWordVO();
+            CalibrationWordVO girlWordVO = new CalibrationWordVO();
 
-            calibWordVO.setCalibSourceWord("여대");
-            calibWordVO.setCalibDestWord("여자대");
-            result.add(calibWordVO);
+            girlWordVO.setCalibSourceWord("여대");
+            girlWordVO.setCalibDestWord("여자대");
+            result.add(girlWordVO);
 
             return result;
+        }
+
+        @Override
+        public String[] getWordForFoundedWordCalib() {
+            return new String[]{"학부", "부속", "부설", "병설"};
+        }
+
+        @Override
+        public String getPatternStr() {
+            String seperater = this.getPatternSeperateStr();
+            return this.getFindWordStr() + seperater + this.getFindWordStr().toCharArray()[0] + seperater + this.getExceptedWord();
         }
     },
     HIGH_SCHOOL("고등학교") {
@@ -58,6 +68,17 @@ public enum FindSchoolType implements FindWordType {
 
             return result;
         }
+
+        @Override
+        public String[] getWordForFoundedWordCalib() {
+            return null;
+        }
+
+        @Override
+        public String getPatternStr() {
+            String seperater = this.getPatternSeperateStr();
+            return this.getFindWordStr() + seperater + this.getFindWordStr().toCharArray()[0] + seperater + this.getExceptedWord();
+        }
     },
     MIDDLE_SCHOOL("중학교") {
 
@@ -78,6 +99,17 @@ public enum FindSchoolType implements FindWordType {
 
             return result;
         }
+
+        @Override
+        public String[] getWordForFoundedWordCalib() {
+            return null;
+        }
+
+        @Override
+        public String getPatternStr() {
+            String seperater = this.getPatternSeperateStr();
+            return this.getFindWordStr() + seperater + this.getFindWordStr().toCharArray()[0] + seperater + this.getExceptedWord();
+        }
     },
     ELEMENTARY_SCHOOL("초등학교") {
 
@@ -86,11 +118,24 @@ public enum FindSchoolType implements FindWordType {
             List<CalibrationWordVO> result = new ArrayList<CalibrationWordVO>();
             return result;
         }
+
+        @Override
+        public String[] getWordForFoundedWordCalib() {
+            return null;
+        }
+
+        @Override
+        public String getPatternStr() {
+            String seperater = this.getPatternSeperateStr();
+            return this.getFindWordStr() + seperater + this.getFindWordStr().toCharArray()[0] + seperater + this.getExceptedWord();
+        }
     };
 
     private String findWordStr = null;
-    private final String patternSeperateStr = "\\|";
-    private final String[] delCalibrationWordArr = {"특성화", "인터넷", "여자", "남자"};
+    private String exceptedWord = null;
+    private final String defaultExceptedWord = "학생";
+    private final String patternSeperateStr = "|";
+    private final String[] delCalibrationWordArr = {"등학생", "학생", "특성화", "인터넷", "여자", "남자", "대사범", "감사"};
 
     FindSchoolType(String findWordStr) {
         this.findWordStr = findWordStr;
@@ -102,14 +147,11 @@ public enum FindSchoolType implements FindWordType {
     }
 
     @Override
-    public String getPatternStr() {
-        return this.findWordStr + patternSeperateStr.replace("\\", "") + this.findWordStr.toCharArray()[0];
-    }
+    public abstract String getPatternStr();
 
     @Override
-    public Pattern getFindPattern() {
-        return Pattern.compile("^.{0,}(" + this.getPatternStr() + ")$", 2);
-        //        return Pattern.compile("^.{0,}(" + this.findWordStr + ")$", 2);
+    public String getPatternSeperateStr() {
+        return this.patternSeperateStr;
     }
 
     @Override
@@ -118,5 +160,22 @@ public enum FindSchoolType implements FindWordType {
     }
 
     @Override
+    public abstract String[] getWordForFoundedWordCalib();
+
+    @Override
     public abstract List<CalibrationWordVO> getCalibrationWordList();
+
+    protected String getExceptedWord() {
+        String findWord = this.getFindWordStr();
+        String keyWord = "등";
+        String result = null;
+
+        if(findWord.contains(keyWord)) {
+            result = String.valueOf(findWord.toCharArray()[0]) + keyWord;
+        } else {
+            result = String.valueOf(findWord.toCharArray()[0]);
+        }
+
+        return result + this.defaultExceptedWord;
+    }
 }

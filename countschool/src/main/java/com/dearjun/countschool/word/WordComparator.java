@@ -7,6 +7,8 @@
 package com.dearjun.countschool.word;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.dearjun.countschool.type.FindWordType;
 import com.dearjun.countschool.utils.StringUtil;
@@ -88,7 +90,10 @@ public class WordComparator {
         String result = calibTargetWord;
 
         for(CalibrationWordVO tmpCalibWord : this.calibrationWordList) {
-            if(result.contains(tmpCalibWord.getCalibSourceWord())) {
+            Pattern calibPattern = Pattern.compile("^.{0,}(" + tmpCalibWord.getCalibSourceWord() + ")$", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = calibPattern.matcher(calibTargetWord);
+
+            if(matcher.find()) {
                 result = result.replace(tmpCalibWord.getCalibSourceWord(), tmpCalibWord.getCalibDestWord());
             }
         }

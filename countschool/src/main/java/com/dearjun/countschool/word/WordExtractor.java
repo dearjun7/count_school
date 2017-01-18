@@ -99,7 +99,6 @@ public class WordExtractor {
         boolean result = false;
         String findWordStr = this.findWordType.getFindWordStr();
         String shortFindWord = String.valueOf(findWordStr.toCharArray()[0]);
-        String tmpWord = foundWord;
 
         if(foundWord.length() == 2 && foundWord.endsWith(shortFindWord)) {
             result = true;
@@ -111,16 +110,46 @@ public class WordExtractor {
     private String getFoundWord(Pair<String, String> wordMorph, List<Pair<String, String>> wordMorphPairList) {
         String foundWord = "";
 
-        if("NNG".equals(wordMorph.getSecond())) { // 형태소가 명사 인 것만 추출
+        if("NNG".equals(wordMorph.getSecond()) || "NNP".equals(wordMorph.getSecond())) { // 형태소가 명사 인 것만 추출
             Matcher matcher = this.findWordType.getFindPattern().matcher(wordMorph.getFirst());
 
             while(matcher.find()) {
-                this.setAndFindPrevWord(wordMorph, wordMorphPairList);
-                foundWord = wordMorph.getFirst();
+                if(!this.isDetectedCalibWordFromNextWord(wordMorphPairList)) {
+                    this.setAndFindPrevWord(wordMorph, wordMorphPairList);
+                    foundWord = wordMorph.getFirst();
+                }
             }
         }
 
         return foundWord;
+    }
+
+    private boolean isDetectedCalibWordFromNextWord(List<Pair<String, String>> wordMorphPairList) {
+        boolean result = false;
+        String[] wordForFoundedWordCalibArr = this.findWordType.getWordForFoundedWordCalib();
+
+        for(Pair<String, String> wordMorph : wordMorphPairList) {
+            boolean isBreakLoop = false;
+
+            if(wordForFoundedWordCalibArr == null) {
+                isBreakLoop = true;
+                break;
+            }
+
+            for(String wordForFoundedWordCalib : wordForFoundedWordCalibArr) {
+                if(wordMorph.getFirst().contains(wordForFoundedWordCalib)) {
+                    result = true;
+                    isBreakLoop = true;
+                    break;
+                }
+            }
+
+            if(isBreakLoop) {
+                break;
+            }
+        }
+
+        return result;
     }
 
     private void setAndFindPrevWord(Pair<String, String> targetWordMorph, List<Pair<String, String>> wordMorphPairList) {

@@ -20,11 +20,17 @@ public interface FindWordType {
 
     public String getFindWordStr();
 
-    public Pattern getFindPattern();
-
     public String getPatternStr();
+
+    public String getPatternSeperateStr();
 
     public String[] getDelCalibrationWordArr();
 
+    public String[] getWordForFoundedWordCalib();
+
     public List<CalibrationWordVO> getCalibrationWordList();
+
+    public default Pattern getFindPattern() {
+        return Pattern.compile("^.{0,}(" + this.getPatternStr() + ")$", Pattern.CASE_INSENSITIVE);
+    }
 }

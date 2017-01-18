@@ -12,14 +12,12 @@ import com.dearjun.countschool.word.WordExtractor;
 public class ExecuteCountSchool {
 
     private static final int ALLOWED_SIMILAR_PERSANTAGE = 60;
-    //    String firstString = firstString.replace("특성화", "").replace("인터넷", "").replace("여자", "").replace("남자", "").replace("감사", "");
-    //    String secondString = secondString.replace("특성화", "").replace("인터넷", "").replace("여자", "").replace("남자", "").replace("감사", "");
 
     public static void main(String... args) throws Exception {
         String filePath = ExecuteCountSchool.class.getResource("/data/comments.csv").getPath();
         List<String> commentList = CommentToListMaker.convertFileToList(filePath);
 
-        WordExtractor wordExtractor = new WordExtractor(FindSchoolType.HIGH_SCHOOL);
+        WordExtractor wordExtractor = new WordExtractor(FindSchoolType.MIDDLE_SCHOOL);
         List<String> analyzedWordList = wordExtractor.getAnalyedWordList(commentList);
         List<String> compareWordList = new ArrayList<String>();
 
