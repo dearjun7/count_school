@@ -61,7 +61,7 @@ public class CommentToListMaker {
         }
 
         String match = "[^가-힣\\s]";
-        tmpComment = tmpCommentBuffer.toString().replaceAll(match, "");
+        tmpComment = tmpCommentBuffer.toString().replaceAll("-", " ").replaceAll(match, "");
 
         List<String> resultList = new ArrayList<String>();
 

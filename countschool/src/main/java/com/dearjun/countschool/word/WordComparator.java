@@ -1,0 +1,98 @@
+/**
+ * Revision History
+ * Author Date Description
+ * ------------------- ---------------- --------------------------
+ * dearj 2017. 1. 17. First Draft
+ */
+package com.dearjun.countschool.word;
+
+import java.util.List;
+
+import com.dearjun.countschool.type.FindWordType;
+import com.dearjun.countschool.utils.StringUtil;
+import com.dearjun.countschool.vo.CalibrationWordVO;
+
+/**
+ * WordComparator.java
+ * 
+ * @author dearj
+ */
+public class WordComparator {
+
+    private int similarPersantage = 0;
+    private boolean addPatternWordToEnd = true;
+    private String[] delCalibrationWordArr = null;
+    private List<CalibrationWordVO> calibrationWordList = null;
+
+    public WordComparator(int similarPersantage, boolean addPatternWordToEnd, FindWordType findWordType) {
+        this.similarPersantage = similarPersantage;
+        this.addPatternWordToEnd = addPatternWordToEnd;
+        this.delCalibrationWordArr = findWordType.getDelCalibrationWordArr();
+        this.calibrationWordList = findWordType.getCalibrationWordList();
+    }
+
+    public boolean isCalibratedSimilarWord(String firstStringParam, String secondStringParam, WordExtractor wordExtractor) {
+        boolean result = false;
+        boolean isCalibFirstWord = false;
+        boolean isCalibSecondWord = false;
+
+        String firstString = this.doCalibrateWord(firstStringParam);
+        String secondString = this.doCalibrateWord(secondStringParam);
+
+        for(String calibrationWord : this.delCalibrationWordArr) {
+            if(firstString.contains(calibrationWord)) {
+                firstString = firstString.replace(calibrationWord, "");
+
+                if(!isCalibFirstWord) {
+                    isCalibFirstWord = true;
+                }
+            }
+
+            if(secondString.contains(calibrationWord)) {
+                secondString = secondString.replace(calibrationWord, "");
+
+                if(!isCalibSecondWord) {
+                    isCalibSecondWord = true;
+                }
+            }
+        }
+
+        firstString = wordExtractor.getWordExcludePatternStr(firstString, "NNG", addPatternWordToEnd, isCalibFirstWord);
+        secondString = wordExtractor.getWordExcludePatternStr(secondString, "NNG", addPatternWordToEnd, isCalibSecondWord);
+
+        int firstLength = firstString.length();
+        int secondLength = secondString.length();
+
+        if(firstLength == 1 || secondLength == 1) {
+            return false;
+        }
+
+        if(addPatternWordToEnd && (firstString.equals(wordExtractor.getFindWordType().getFindWordStr())
+                || secondString.equals(wordExtractor.getFindWordType().getFindWordStr()))) {
+            return false;
+        }
+
+        if(StringUtil.similar(firstString, secondString) >= similarPersantage) {
+            String biggerStr = firstLength > secondLength ? firstString : firstLength < secondLength ? secondString : firstString;
+            String smallerStr = firstLength > secondLength ? secondString : firstLength < secondLength ? firstString : secondString;
+
+            if(biggerStr.contains(smallerStr)) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    private String doCalibrateWord(String calibTargetWord) {
+        String result = calibTargetWord;
+
+        for(CalibrationWordVO tmpCalibWord : this.calibrationWordList) {
+            if(result.contains(tmpCalibWord.getCalibSourceWord())) {
+                result = result.replace(tmpCalibWord.getCalibSourceWord(), tmpCalibWord.getCalibDestWord());
+            }
+        }
+
+        return result;
+    }
+}
