@@ -25,12 +25,14 @@ public class WordComparator {
     private boolean addPatternWordToEnd = true;
     private String[] delCalibrationWordArr = null;
     private List<CalibrationWordVO> calibrationWordList = null;
+    private List<CalibrationWordVO> calibLocationList = null;
 
     public WordComparator(int similarPersantage, boolean addPatternWordToEnd, FindWordType findWordType) {
         this.similarPersantage = similarPersantage;
         this.addPatternWordToEnd = addPatternWordToEnd;
         this.delCalibrationWordArr = findWordType.getDelCalibrationWordArr();
         this.calibrationWordList = findWordType.getCalibrationWordList();
+        this.calibLocationList = findWordType.getCalibrationLocationList();
     }
 
     public boolean isCalibratedSimilarWord(String firstStringParam, String secondStringParam, WordExtractor wordExtractor) {
@@ -59,8 +61,8 @@ public class WordComparator {
             }
         }
 
-        firstString = wordExtractor.getWordExcludePatternStr(firstString, "NNG", addPatternWordToEnd, isCalibFirstWord);
-        secondString = wordExtractor.getWordExcludePatternStr(secondString, "NNG", addPatternWordToEnd, isCalibSecondWord);
+        firstString = wordExtractor.getWordExcludePatternStr(firstString, addPatternWordToEnd, isCalibFirstWord);
+        secondString = wordExtractor.getWordExcludePatternStr(secondString, addPatternWordToEnd, isCalibSecondWord);
 
         int firstLength = firstString.length();
         int secondLength = secondString.length();
@@ -86,7 +88,7 @@ public class WordComparator {
         return result;
     }
 
-    private String doCalibrateWord(String calibTargetWord) {
+    public String doCalibrateWord(String calibTargetWord) {
         String result = calibTargetWord;
 
         for(CalibrationWordVO tmpCalibWord : this.calibrationWordList) {
@@ -95,6 +97,24 @@ public class WordComparator {
 
             if(matcher.find()) {
                 result = result.replace(tmpCalibWord.getCalibSourceWord(), tmpCalibWord.getCalibDestWord());
+            }
+        }
+
+        return result;
+    }
+
+    public String doCalibrateLocation(String calibTargetWord) {
+        String result = calibTargetWord;
+
+        if(this.calibLocationList == null) {
+            return result;
+        }
+
+        for(CalibrationWordVO tmpCalibLocation : this.calibLocationList) {
+            String sourceWord = tmpCalibLocation.getCalibSourceWord();
+
+            if(result.contains(sourceWord)) {
+                result = result.replace(sourceWord, tmpCalibLocation.getCalibDestWord());
             }
         }
 

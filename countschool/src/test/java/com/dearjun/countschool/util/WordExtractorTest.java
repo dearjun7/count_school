@@ -24,7 +24,7 @@ public class WordExtractorTest {
     public void getWordTest() {
         WordExtractor wordExtractor = new WordExtractor(FindSchoolType.HIGH_SCHOOL);
 
-        String result = wordExtractor.getWordExcludePatternStr("고림고등학교", "NNG", true, true);
+        String result = wordExtractor.getWordExcludePatternStr("고림고등학교", true, true);
         System.out.println(result);
 
         Assert.assertEquals("고림고", result);

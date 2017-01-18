@@ -1,3 +1,9 @@
+/**
+ * Revision History
+ * Author Date Description
+ * ------------------- ---------------- --------------------------
+ * dearj 2017. 1. 14. First Draft
+ */
 package com.dearjun.countschool.utils;
 
 import java.io.BufferedReader;
@@ -8,6 +14,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * CommentToListMaker.java
+ * 
+ * @author dearj
+ */
 public class CommentToListMaker {
 
     /**

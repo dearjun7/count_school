@@ -1,3 +1,9 @@
+/**
+ * Revision History
+ * Author Date Description
+ * ------------------- ---------------- --------------------------
+ * dearj 2017. 1. 14. First Draft
+ */
 package com.dearjun.countschool.word;
 
 import java.util.ArrayList;
@@ -12,6 +18,11 @@ import com.dearjun.countschool.utils.StringUtil;
 import kr.co.shineware.nlp.komoran.core.analyzer.Komoran;
 import kr.co.shineware.util.common.model.Pair;
 
+/**
+ * WordExtractor.java
+ * 
+ * @author dearj
+ */
 public class WordExtractor {
 
     private int wordMorphIndex = 0;
@@ -34,7 +45,7 @@ public class WordExtractor {
     }
 
     @SuppressWarnings("unchecked")
-    public String getWordExcludePatternStr(String targetWord, String pairTypeStr, boolean addPatternWordToEnd, boolean isCalibratedWord) {
+    public String getWordExcludePatternStr(String targetWord, boolean addPatternWordToEnd, boolean isCalibratedWord) {
         List<List<Pair<String, String>>> analyzeList = this.komoran.analyze(targetWord);
         String result = "";
 

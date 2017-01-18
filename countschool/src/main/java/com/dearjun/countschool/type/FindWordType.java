@@ -18,6 +18,8 @@ import com.dearjun.countschool.vo.CalibrationWordVO;
  */
 public interface FindWordType {
 
+    public String getSearchTypeKey();
+
     public String getFindWordStr();
 
     public String getPatternStr();
@@ -29,6 +31,8 @@ public interface FindWordType {
     public String[] getWordForFoundedWordCalib();
 
     public List<CalibrationWordVO> getCalibrationWordList();
+
+    public List<CalibrationWordVO> getCalibrationLocationList();
 
     public default Pattern getFindPattern() {
         return Pattern.compile("^.{0,}(" + this.getPatternStr() + ")$", Pattern.CASE_INSENSITIVE);

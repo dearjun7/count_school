@@ -1,5 +1,16 @@
+/**
+ * Revision History
+ * Author Date Description
+ * ------------------- ---------------- --------------------------
+ * dearj 2017. 1. 14. First Draft
+ */
 package com.dearjun.countschool.utils;
 
+/**
+ * StringUtil.java
+ * 
+ * @author dearj
+ */
 public class StringUtil {
 
     public static int similar(String firstString, String secondString) {
