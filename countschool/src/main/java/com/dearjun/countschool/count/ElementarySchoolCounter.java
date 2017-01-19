@@ -23,6 +23,7 @@ public class ElementarySchoolCounter implements SchoolCounter {
 
     public ElementarySchoolCounter(int allowedSimilarPersantage, int minWordSize) {
         this.allowedSimilarPersantage = allowedSimilarPersantage;
+        this.minWordSize = minWordSize;
     }
 
     @Override

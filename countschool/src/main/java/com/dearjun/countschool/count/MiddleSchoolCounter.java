@@ -23,6 +23,7 @@ public class MiddleSchoolCounter implements SchoolCounter {
 
     public MiddleSchoolCounter(int allowedSimilarPersantage, int minWordSize) {
         this.allowedSimilarPersantage = allowedSimilarPersantage;
+        this.minWordSize = minWordSize;
     }
 
     @Override

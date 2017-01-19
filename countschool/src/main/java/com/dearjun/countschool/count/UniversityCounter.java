@@ -23,6 +23,7 @@ public class UniversityCounter implements SchoolCounter {
 
     public UniversityCounter(int allowedSimilarPersantage, int minWordSize) {
         this.allowedSimilarPersantage = allowedSimilarPersantage;
+        this.minWordSize = minWordSize;
     }
 
     @Override
