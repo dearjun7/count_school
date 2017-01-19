@@ -55,7 +55,7 @@ public class SearchResultCounter {
                 if(result) {
                     existCheckedWord = wordComparator.doCalibrateLocation(firstString);
 
-                    if(existCheckedWord.length() > 2
+                    if(existCheckedWord.length() > this.minWordSize
                             && apiSearcher.checkExistSearchKeyword(existCheckedWord, wordExtractor.getFindWordType().getSearchTypeKey())) {
                         isExistSchool = true;
                     }

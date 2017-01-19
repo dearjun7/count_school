@@ -7,6 +7,7 @@
 package com.dearjun.countschool.external;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -47,7 +48,9 @@ public class SchoolDataSearcher implements OpenAPISearcher {
             if(!resultArr.isEmpty()) {
                 result = true;
             }
-
+        } catch(FileNotFoundException fne) {
+            //            System.out.println("======= 학교 정보 검색 오픈API 서버 에러로 학교 이름 정합성 검사 없이 진행합니다. ========");
+            result = true;
         } catch(Exception e) {
             throw new Exception(e);
         } finally {
