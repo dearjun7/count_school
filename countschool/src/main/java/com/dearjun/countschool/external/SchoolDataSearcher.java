@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 /**
@@ -50,6 +51,8 @@ public class SchoolDataSearcher implements OpenAPISearcher {
             }
         } catch(FileNotFoundException fne) {
             //            System.out.println("======= 학교 정보 검색 오픈API 서버 에러로 학교 이름 정합성 검사 없이 진행합니다. ========");
+            result = true;
+        } catch(JSONException je) {
             result = true;
         } catch(Exception e) {
             throw new Exception(e);
