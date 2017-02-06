@@ -50,7 +50,6 @@ public class SchoolDataSearcher implements OpenAPISearcher {
                 result = true;
             }
         } catch(FileNotFoundException fne) {
-            //            System.out.println("======= 학교 정보 검색 오픈API 서버 에러로 학교 이름 정합성 검사 없이 진행합니다. ========");
             result = true;
         } catch(JSONException je) {
             result = true;
